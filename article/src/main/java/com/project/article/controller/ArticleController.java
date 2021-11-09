@@ -1,39 +1,32 @@
 package com.project.article.controller;
 
-import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.*;
 
 import com.project.article.exception.ArticleNotFoundException;
 import com.project.article.model.Article;
 import com.project.article.model.Login;
-import com.project.article.repository.Repo;
 import com.project.article.repository.ArticleRespostitory;
+import com.project.article.repository.Repo;
 
-@RestController
-@RequestMapping("v1")
+import org.springframework.web.servlet.ModelAndView;
+
+import java.util.ArrayList;
+import java.util.List;
+
+@Controller
 public class ArticleController {
 	
 	@Autowired
 	private ArticleRespostitory articleRepository;
-	
-	@Autowired
+
+    @Autowired
 	private Repo repo;
 	
 	
-	
-	@RequestMapping(value = "/login", method = RequestMethod.GET)
+    @RequestMapping(value = "/login", method = RequestMethod.GET)
 	public String login() {
 		return "login";
 			
@@ -49,9 +42,9 @@ public class ArticleController {
 				return "author";
 			}
 			else if (log.getRole().equals("Reader")) {
-				return "reader";
+				return "reader"; 
 			}
-		}
+		} 
 		else {
 			return "error";
 		}
@@ -59,54 +52,75 @@ public class ArticleController {
 
 		
 	}
-	
-	@PostMapping("/article/create")
-	public ResponseEntity<Article> addEmployee(@RequestBody Article article) {
-		articleRepository.save(article);
-		return new ResponseEntity<Article>(HttpStatus.CREATED);	
+    
+    
+	@GetMapping("/")
+	public String welcome(){
+		return "index";
 	}
-	
-	@GetMapping("/article/{id}")
-	public ResponseEntity<Article> getArticleById(@PathVariable Long id) {
-		Article article= articleRepository.findById(id).orElseThrow(() -> new ArticleNotFoundException("Article not exist: "+id));
-		return ResponseEntity.ok(article);
+
+	@RequestMapping("/createarticle")
+	public ModelAndView showform(){
+
+		return new ModelAndView("createarticle","command",new Article());
 	}
-	
-	@GetMapping("/article/category/{category}")
-	public Article[] getArticleByCategory(@PathVariable String category) {
-		Article[] article = null;
-		try {
-			article = articleRepository.findByCategory(category);
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+
+	@RequestMapping("/editarticle")
+	public ModelAndView showeditform(){
+
+		return new ModelAndView("editarticle","command",new Article());
+	}
+
+	@RequestMapping(value="/save",method = RequestMethod.POST)
+	public ModelAndView save(@ModelAttribute("art") Article art){
+		if(articleRepository.findById(art.getId()).isPresent()){
+			String message = "already present.";
+			return new ModelAndView("/errorpage","message",message);
+		}else {
+			articleRepository.save(art);
+			return new ModelAndView("redirect:/viewarticle");
 		}
-		return article;
+	}
+
+	@RequestMapping(value="/editsave",method = RequestMethod.POST)
+	public ModelAndView editsave(@ModelAttribute("art") Article art){
+			articleRepository.save(art);
+			return new ModelAndView("redirect:/viewarticle");
+	}
+
+	@RequestMapping(value = "/viewarticle")
+	public ModelAndView viewarticle(){
+		ArrayList<Article> articles= (ArrayList<Article>) articleRepository.findAll();
+		return new ModelAndView("viewarticle","articles",articles);
 	}
 	
-	@PutMapping("/article/edit/{id}")
-	public String editArticleById(@PathVariable Long id,@RequestBody Article e) {
-		Article article= articleRepository.findById(id).orElseThrow(() -> new ArticleNotFoundException("Article not exist: "+id));
-		article.setAuthorname(e.getAuthorname());
-		article.setCategory(e.getCategory());
-		article.setContent(e.getContent());
-		article.setDescription(e.getDescription());
-		article.setTitle(e.getTitle());
-		article.setCreatedDate(e.getCreatedDate());
-		articleRepository.save(article);
-		String eu="Successfully updated the Employee with id : "+id+".";
-		return eu;
+	@GetMapping(value = "/deletearticle/{id}")
+	public String getArticleById(@PathVariable long id){
+		articleRepository.deleteById(id);
+		return ("redirect:/viewarticle");
 	}
-	
-	@DeleteMapping("/article/{id}")
-	public String deleteArticleById(@PathVariable Long id) {
-		Article article= articleRepository.findById(id).orElseThrow(() -> new ArticleNotFoundException("Article not exist: "+id));
-		articleRepository.delete(article);
-		String eu="Successfully deleted the Employee with id : "+id+".";
-		return eu;
+
+//	@GetMapping("/article/{category}")
+//	public ModelAndView getArticleByCategory(@PathVariable String category) {
+//		ArrayList<Article> articles= (ArrayList<Article>) articleRepository.findByCategory(category);
+//		return new ModelAndView("viewarticle","articles",articles);
+//	}
+
+	@PostMapping("/editthearticle")
+	public ModelAndView editArticleById(@RequestParam("id") long id){
+		if(articleRepository.findById(id).isPresent()) {
+			Article article = articleRepository.findById(id).orElseThrow(() -> new ArticleNotFoundException("Article not exist: " + id));
+			ModelAndView modelAndView = new ModelAndView();
+			modelAndView.addObject("command", new Article());
+			modelAndView.addObject("article", article);
+			modelAndView.setViewName("editingarticle");
+			return modelAndView;
+		}else{
+			String message = "not found.";
+			return new ModelAndView("/errorpage","message",message);
+		}
+
+		
 	}
-	
-	
-	
 
 }
