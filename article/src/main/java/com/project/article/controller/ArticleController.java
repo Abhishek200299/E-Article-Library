@@ -1,10 +1,12 @@
 package com.project.article.controller;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -14,15 +16,17 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.ModelAndView;
 
 import com.project.article.exception.ArticleNotFoundException;
 import com.project.article.model.Article;
 import com.project.article.model.Login;
 import com.project.article.repository.Repo;
+import com.project.article.repository.ArticleRepo;
 import com.project.article.repository.ArticleRespostitory;
 
-@RestController
-@RequestMapping("v1")
+@Controller
+
 public class ArticleController {
 	
 	@Autowired
@@ -30,6 +34,9 @@ public class ArticleController {
 	
 	@Autowired
 	private Repo repo;
+	
+	@Autowired
+	private ArticleRepo arepo;
 	
 	
 	
@@ -40,7 +47,7 @@ public class ArticleController {
 	}
 	
 	
-	@RequestMapping(value = "/login/create", method = RequestMethod.POST)
+	@RequestMapping(value = "/login", method = RequestMethod.POST)
     public String validateUser(Login login) {
 		
 		Login log = repo.findByUsername(login.getUsername());
@@ -59,6 +66,76 @@ public class ArticleController {
 
 		
 	}
+	
+	@RequestMapping(value="/Fiction", method= RequestMethod.GET)
+	public ModelAndView fictionPage() {
+		List<Article> li = arepo.findByCategory("Fiction");
+		ArrayList<String> articleTitleList = new ArrayList<>(); 
+		for (Article x : li) {
+			articleTitleList.add(x.getTitle());
+		}
+	    ModelAndView modelAndView = new ModelAndView("Fiction");
+	    modelAndView.addObject("titleList", articleTitleList);
+	    return modelAndView;
+
+	}
+	
+	@RequestMapping(value="/Non-Fiction", method= RequestMethod.GET)
+	public ModelAndView nonFictionPage() {
+		List<Article> li = arepo.findByCategory("Non-Fiction");
+		ArrayList<String> articleTitleList = new ArrayList<>(); 
+		for (Article x : li) {
+			articleTitleList.add(x.getTitle());
+		}
+	    ModelAndView modelAndView = new ModelAndView("Non-Fiction");
+	    modelAndView.addObject("titleList", articleTitleList);
+	    return modelAndView;
+
+	}
+	
+	@RequestMapping(value="/Politics", method= RequestMethod.GET)
+	public ModelAndView politicsPage() {
+		List<Article> li = arepo.findByCategory("Politics");
+		ArrayList<String> articleTitleList = new ArrayList<>(); 
+		for (Article x : li) {
+			articleTitleList.add(x.getTitle());
+		}
+	    ModelAndView modelAndView = new ModelAndView("Politics");
+	    modelAndView.addObject("titleList", articleTitleList);
+	    return modelAndView;
+
+	}
+	
+	@RequestMapping(value="/Wildlife", method= RequestMethod.GET)
+	public ModelAndView wildlifePage() {
+		List<Article> li = arepo.findByCategory("Wildlife");
+		ArrayList<String> articleTitleList = new ArrayList<>(); 
+		for (Article x : li) {
+			articleTitleList.add(x.getTitle());
+		}
+	    ModelAndView modelAndView = new ModelAndView("Wildlife");
+	    modelAndView.addObject("titleList", articleTitleList);
+	    return modelAndView;
+
+	}
+	
+	@RequestMapping(value="/Science&Tech", method= RequestMethod.GET)
+	public ModelAndView scienceTechPage() {
+		List<Article> li = arepo.findByCategory("Science and Technology");
+		ArrayList<String> articleTitleList = new ArrayList<>(); 
+		for (Article x : li) {
+			articleTitleList.add(x.getTitle());
+		}
+	    ModelAndView modelAndView = new ModelAndView("Science&Tech");
+	    modelAndView.addObject("titleList", articleTitleList);
+	    return modelAndView;
+
+	}
+	
+	
+	
+	
+	
 	
 	@PostMapping("/article/create")
 	public ResponseEntity<Article> addEmployee(@RequestBody Article article) {

@@ -18,7 +18,7 @@ public class Article {
 	@Id
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	@Column(name="id")
-	private long id;
+	private Integer id;
 	
 	@Column(name="authorname")
 	private String authorname;
@@ -39,11 +39,11 @@ public class Article {
 	@Column(name = "Date")
 	private Date createdDate;
 	
-	public long getId() {
+	public Integer getId() {
 		return id;
 	}
 
-	public void setId(long id) {
+	public void setId(Integer id) {
 		this.id = id;
 	}
 
